@@ -124,9 +124,6 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-
-
-
 """ run one time to create the database tables """
 # with app.app_context():
 #     db.create_all
