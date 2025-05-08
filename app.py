@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from data_models import db, Author, Book 
 import os
 from datetime import datetime
+from sqlalchemy import func
 
 app = Flask(__name__)
 
@@ -17,9 +18,15 @@ db.init_app(app)
 def home():
     """
     Home page route. Queries all books from the database and renders the home.html template with the books data.
+    Allows sorting by title or author name based on query parameters.
     """
-    books = Book.query.all()
-    return render_template('home.html', books=books)
+    sort_by = request.args.get('sort_by', 'title')
+    if sort_by == 'author':
+        books = Book.query.join(Author).order_by(Author.name).all()
+    else:
+        books = Book.query.order_by(func.lower(Book.title)).all()
+
+    return render_template('home.html', books=books, sort_by=sort_by)
 
 
 @app.route('/add_author', methods=['GET', 'POST'])
