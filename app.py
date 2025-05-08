@@ -13,6 +13,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(base_dir, "dat
 db.init_app(app)
 
 
+@app.route('/')
+def home():
+    """
+    Home page route. Queries all books from the database and renders the home.html template with the books data.
+    """
+    books = Book.query.all()
+    return render_template('home.html', books=books)
+
+
 @app.route('/add_author', methods=['GET', 'POST'])
 def add_author():
     """
