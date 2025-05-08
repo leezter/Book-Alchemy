@@ -19,14 +19,24 @@ def home():
     """
     Home page route. Queries all books from the database and renders the home.html template with the books data.
     Allows sorting by title or author name based on query parameters.
+    Also supports keyword search in book titles.
     """
     sort_by = request.args.get('sort_by', 'title')
-    if sort_by == 'author':
-        books = Book.query.join(Author).order_by(Author.name).all()
-    else:
-        books = Book.query.order_by(func.lower(Book.title)).all()
+    search_query = request.args.get('search', '')
 
-    return render_template('home.html', books=books, sort_by=sort_by)
+    query = Book.query
+
+    if search_query:
+        query = query.filter(Book.title.ilike(f"%{search_query}%"))
+
+    if sort_by == 'author':
+        books = query.join(Author).order_by(Author.name).all()
+    else:
+        books = query.order_by(func.lower(Book.title)).all()
+
+    no_results = not books and search_query
+
+    return render_template('home.html', books=books, sort_by=sort_by, search_query=search_query, no_results=no_results)
 
 
 @app.route('/add_author', methods=['GET', 'POST'])
