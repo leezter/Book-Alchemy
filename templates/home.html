@@ -18,6 +18,18 @@
       <button type="submit">Search</button>
     </form>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes" style="list-style-type: none; padding: 0; margin: 1em 0;">
+          {% for category, message in messages %}
+            <li class="{{ category }}" style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 5px; border: 1px solid #f5c6cb; border-radius: 5px;">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     {% if no_results %}
       <p>No books match your search criteria.</p>
     {% endif %}
@@ -26,6 +38,9 @@
     <div style="display: flex; align-items: center; margin-bottom: 1em;">
       <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover for {{ book.title }}" style="height:100px; margin-right: 16px;">
       <h3>{{ book.title }} <small>by {{ book.author.name }}</small></h3>
+      <form action="/delete/{{ book.id }}" method="POST" style="margin-left: auto;">
+        <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">Delete Book</button>
+      </form>
     </div>
     {% endfor %}
 

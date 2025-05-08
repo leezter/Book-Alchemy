@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
 from data_models import db, Author, Book 
 import os
@@ -20,6 +20,7 @@ def home():
     Home page route. Queries all books from the database and renders the home.html template with the books data.
     Allows sorting by title or author name based on query parameters.
     Also supports keyword search in book titles.
+    Displays success messages for actions like book deletion.
     """
     sort_by = request.args.get('sort_by', 'title')
     search_query = request.args.get('search', '')
@@ -36,7 +37,10 @@ def home():
 
     no_results = not books and search_query
 
-    return render_template('home.html', books=books, sort_by=sort_by, search_query=search_query, no_results=no_results)
+    # Explicitly handle flashed messages
+    messages = get_flashed_messages(with_categories=True)
+
+    return render_template('home.html', books=books, sort_by=sort_by, search_query=search_query, no_results=no_results, messages=messages)
 
 
 @app.route('/add_author', methods=['GET', 'POST'])
@@ -91,6 +95,27 @@ def add_book():
 
     authors = Author.query.all()
     return render_template('add_book.html', authors=authors)
+
+
+@app.route('/delete/<int:book_id>', methods=['POST'])
+def delete_book(book_id):
+    """
+    Deletes a specific book from the database. If the book's author has no other books, deletes the author as well.
+    Redirects to the homepage with a success message after deletion.
+    """
+    book = Book.query.get_or_404(book_id)
+    author = book.author
+
+    db.session.delete(book)
+    db.session.commit()
+
+    # Check if the author has any other books
+    if not author.books:
+        db.session.delete(author)
+        db.session.commit()
+
+    flash(f"Book '{book.title}' deleted successfully!", 'success')
+    return redirect('/')
 
 
 if __name__ == "__main__":
