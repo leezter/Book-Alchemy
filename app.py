@@ -118,10 +118,13 @@ def delete_book(book_id):
     return redirect('/')
 
 
-if __name__ == "__main__":
+def main():
     print(f"Using database file: {os.path.join(base_dir, 'data', 'library.sqlite')}")
     app.secret_key = 'your_secret_key_here'  # Replace with a secure key
     app.run(debug=True)
+
+if __name__ == "__main__":
+    main()
 
 
 """ run one time to create the database tables """
